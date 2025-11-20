@@ -1,29 +1,80 @@
 from pydantic import BaseModel
+from datetime import date
+from typing import Optional
 
-class DepartmentBase(BaseModel):
+
+# -----------------------------
+# USER SCHEMAS
+# -----------------------------
+
+class UserCreate(BaseModel):
+    username: str
+    email: str
+    password: str
+    company_name: str
+
+
+class User(BaseModel):
+    id: int
+    username: str
+    email: str
+    company_id: int
+    company_name: str   # returned from joined company table
+
+    class Config:
+        from_attributes = True
+
+
+# -----------------------------
+# TOKEN
+# -----------------------------
+class Token(BaseModel):
+    access_token: str
+    token_type: str
+
+
+class TokenData(BaseModel):
+    username: Optional[str] = None
+
+
+# -----------------------------
+# DEPARTMENT SCHEMAS
+# -----------------------------
+class DepartmentCreate(BaseModel):
     name: str
 
-class DepartmentCreate(DepartmentBase):
-    pass
 
-class Department(DepartmentBase):
+class Department(BaseModel):
     id: int
-    class Config:
-        orm_mode = True
+    name: str
+    company_id: int
 
-class EmployeeBase(BaseModel):
+    class Config:
+        from_attributes = True
+
+
+# -----------------------------
+# EMPLOYEE SCHEMAS
+# -----------------------------
+class EmployeeCreate(BaseModel):
     name: str
     email: str
     job_title: str
-    salary: float
-    join_date: str
+    salary: int
+    join_date: date
     department_id: int
 
-class EmployeeCreate(EmployeeBase):
-    pass
 
-class Employee(EmployeeBase):
+class Employee(BaseModel):
     id: int
-    department_name: str | None = None
+    name: str
+    email: str
+    job_title: str
+    salary: int
+    join_date: date
+    department_id: int
+    company_id: int
+    department_name: Optional[str] = None
+
     class Config:
-        orm_mode = True
+        from_attributes = True
