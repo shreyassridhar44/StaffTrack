@@ -55,6 +55,40 @@ function EmployeePage() {
     }
   };
 
+  // ---------------------------------------------------
+  // FIXED CSV EXPORT (with Authorization header)
+  // ---------------------------------------------------
+  const handleExportCSV = async () => {
+    try {
+      const token = localStorage.getItem("access_token");
+
+      const response = await fetch(`${API_URL}/api/employees/export`, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        alert("Error exporting CSV.");
+        return;
+      }
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "employees.csv";
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    } catch (err) {
+      console.error("CSV export error:", err);
+      alert("Failed to export CSV.");
+    }
+  };
+
   return (
     <div className="space-y-10 p-6">
 
@@ -79,15 +113,12 @@ function EmployeePage() {
           + Add Employee
         </button>
 
-        <a
-          href={`${API_URL}/api/employees/export`}
-          download="employees.csv"
-          target="_blank"
-          rel="noopener noreferrer"
+        <button
+          onClick={handleExportCSV}
           className="px-5 py-2 bg-[#0F1B33] text-white rounded-lg hover:bg-[#1A2A4A] transition shadow-md"
         >
           Export CSV
-        </a>
+        </button>
 
       </div>
 

@@ -27,7 +27,7 @@ function AddEmployeeModal({ isOpen, onClose, onSuccess }) {
       email,
       job_title: jobTitle,
       salary: parseFloat(salary),
-      join_date: joinDate,
+      join_date: joinDate.toString(),
       department_id: parseInt(departmentId),
     };
 

@@ -19,7 +19,7 @@ class User(BaseModel):
     username: str
     email: str
     company_id: int
-    company_name: str   # returned from joined company table
+    company_name: str
 
     class Config:
         from_attributes = True

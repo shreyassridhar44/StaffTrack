@@ -12,20 +12,26 @@ function EditEmployeeModal({ isOpen, onClose, onSuccess, employee }) {
 
   useEffect(() => {
     if (isOpen) {
-      api
-        .get("/api/departments")
+      api.get("/api/departments")
         .then((res) => setDepartments(res.data))
         .catch(console.error);
     }
   }, [isOpen]);
 
+  // Properly populate fields when editing
   useEffect(() => {
     if (employee) {
       setName(employee.name);
       setEmail(employee.email);
       setJobTitle(employee.job_title);
       setSalary(employee.salary);
-      setJoinDate(employee.join_date);
+
+      // Fix date format (string → yyyy-mm-dd)
+      const formatted = employee.join_date
+        ? employee.join_date.substring(0, 10)
+        : "";
+
+      setJoinDate(formatted);
       setDepartmentId(employee.department_id);
     }
   }, [employee]);
@@ -37,13 +43,12 @@ function EditEmployeeModal({ isOpen, onClose, onSuccess, employee }) {
       name,
       email,
       job_title: jobTitle,
-      salary: parseFloat(salary),
+      salary: Number(salary),
       join_date: joinDate,
-      department_id: parseInt(departmentId),
+      department_id: Number(departmentId)
     };
 
-    api
-      .put(`/api/employees/${employee.id}`, updatedEmployee)
+    api.put(`/api/employees/${employee.id}`, updatedEmployee)
       .then(() => {
         onSuccess();
         onClose();
@@ -56,20 +61,18 @@ function EditEmployeeModal({ isOpen, onClose, onSuccess, employee }) {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex justify-center items-center z-50 animate-fadeIn">
-
-      <div className="w-full max-w-2xl bg-white rounded-2xl shadow-2xl p-8 animate-scaleIn border border-slate-200 relative">
+    <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex justify-center items-center z-50">
+      <div className="w-full max-w-2xl bg-white rounded-2xl shadow-xl p-8 relative">
 
         <div className="absolute top-0 left-0 w-full h-1 bg-blue-600 rounded-t-2xl"></div>
 
-        <h2 className="text-2xl font-bold text-slate-900 mb-6">Edit Employee</h2>
+        <h2 className="text-2xl font-bold mb-6">Edit Employee</h2>
 
         <form onSubmit={handleSubmit} className="space-y-6">
-
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
 
             <div>
-              <label className="text-sm font-medium text-slate-700">Full Name</label>
+              <label className="text-sm font-medium">Full Name</label>
               <input
                 className="input-field"
                 value={name}
@@ -79,7 +82,7 @@ function EditEmployeeModal({ isOpen, onClose, onSuccess, employee }) {
             </div>
 
             <div>
-              <label className="text-sm font-medium text-slate-700">Email</label>
+              <label className="text-sm font-medium">Email</label>
               <input
                 type="email"
                 className="input-field"
@@ -90,7 +93,7 @@ function EditEmployeeModal({ isOpen, onClose, onSuccess, employee }) {
             </div>
 
             <div>
-              <label className="text-sm font-medium text-slate-700">Job Title</label>
+              <label className="text-sm font-medium">Job Title</label>
               <input
                 className="input-field"
                 value={jobTitle}
@@ -100,7 +103,7 @@ function EditEmployeeModal({ isOpen, onClose, onSuccess, employee }) {
             </div>
 
             <div>
-              <label className="text-sm font-medium text-slate-700">Salary</label>
+              <label className="text-sm font-medium">Salary</label>
               <input
                 type="number"
                 className="input-field"
@@ -111,7 +114,7 @@ function EditEmployeeModal({ isOpen, onClose, onSuccess, employee }) {
             </div>
 
             <div>
-              <label className="text-sm font-medium text-slate-700">Join Date</label>
+              <label className="text-sm font-medium">Join Date</label>
               <input
                 type="date"
                 className="input-field"
@@ -122,14 +125,14 @@ function EditEmployeeModal({ isOpen, onClose, onSuccess, employee }) {
             </div>
 
             <div>
-              <label className="text-sm font-medium text-slate-700">Department</label>
+              <label className="text-sm font-medium">Department</label>
               <select
                 className="input-field"
                 value={departmentId}
                 onChange={(e) => setDepartmentId(e.target.value)}
                 required
               >
-                <option value="">Select a department</option>
+                <option value="">Select department</option>
                 {departments.map((dep) => (
                   <option key={dep.id} value={dep.id}>
                     {dep.name}
@@ -140,7 +143,7 @@ function EditEmployeeModal({ isOpen, onClose, onSuccess, employee }) {
 
           </div>
 
-          <div className="flex justify-end gap-3 pt-3">
+          <div className="flex justify-end gap-3">
             <button type="button" onClick={onClose} className="btn-cancel">
               Cancel
             </button>
@@ -148,8 +151,8 @@ function EditEmployeeModal({ isOpen, onClose, onSuccess, employee }) {
               Save Changes
             </button>
           </div>
-
         </form>
+
       </div>
     </div>
   );
