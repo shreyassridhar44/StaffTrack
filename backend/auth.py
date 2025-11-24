@@ -10,6 +10,7 @@ from sqlalchemy.orm import Session
 import models, schemas
 from database import get_db
 
+
 # ----------------------------------------------------------
 # JWT CONFIG
 # ----------------------------------------------------------
@@ -76,13 +77,16 @@ def get_current_user(
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         username = payload.get("sub")
+
         if username is None:
             raise HTTPException(status_code=401, detail="Invalid token payload")
+
     except JWTError:
         raise HTTPException(status_code=401, detail="Invalid or expired token")
 
     # Fetch the user
     user = get_user_by_username(db, username)
+
     if not user:
         raise HTTPException(status_code=401, detail="User not found")
 
@@ -156,3 +160,18 @@ def login_for_access_token(
     token = create_access_token({"sub": user.username, "company_id": user.company_id})
 
     return {"access_token": token, "token_type": "bearer"}
+
+
+# ----------------------------------------------------------
+# GET CURRENT USER PROFILE
+# ----------------------------------------------------------
+@router.get("/me", response_model=schemas.User)
+def get_profile(current_user: models.User = Depends(get_current_user)):
+
+    return schemas.User(
+        id=current_user.id,
+        username=current_user.username,
+        email=current_user.email,
+        company_id=current_user.company_id,
+        company_name=current_user.company.company_name if hasattr(current_user, "company") else ""
+    )
